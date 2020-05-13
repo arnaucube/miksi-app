@@ -16,7 +16,7 @@
     "toastr": "^2.1.4",
     "wasmsnark": "0.0.10",
     "snarkjs": "^0.1.31",
-    "web3": "^1.0.0-beta.30"
+    "web3": "1.2.7"
   },
   "devDependencies": {
     "browserify": "^16.5.0"

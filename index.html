@@ -48,13 +48,13 @@
     <div class="card-body">
       <!-- menu -->
       <div class="tab-content" id="myTabContent">
-        <button onclick="todo()" class="btn color_primary-o float-right">Connect Metamask</button>
+        <button onclick="connectMetamask()" class="btn color_primary-o float-right">Connect Metamask</button>
         <h2><i>miksi</i></h2>
         <i>From Esperanto, <b>miksi</b> (miks·i): to mingle, to blend, to mix, to shuffle</i>
         <br>
         Ethereum trustless <b>zk-mixer</b>.
         <br><br>
-        <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet, and without real value.</div>
+        <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet, without any real value.</div>
         <br><br>
 
         <!-- deposit -->
@@ -63,21 +63,26 @@
             <div class="col-md">
               <h5 class="card-title">Deposit</h5>
               <hr>
+              a
               Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.
               <br><br>
               <button onclick="deposit('deposit')" class="btn color_primary float-right">Deposit 1 ETH</button>
-              <br><br><br>
+              <br>
+              <div id="depositRes"></div>
+              <br><br>
             </div>
             <div class="col-md">
               <h5 class="card-title">Withdraw</h5>
               <hr>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.
               <br><br>
-              <input id="secret" type="text" class="form-control" placeholder="secret"></input>
+              <input id="secret" type="text" class="form-control" placeholder="secret" value="1234567890"></input>
               <br>
-              <input id="nullifier" type="text" class="form-control" placeholder="nullifier"></input>
+              <input id="nullifier" type="text" class="form-control" placeholder="nullifier" value="567891234"></input>
               <br>
-              <button onclick="todo()" class="btn color_primary float-right">Withdraw 1 ETH</button>
+              <button onclick="withdraw('withdraw')" class="btn color_primary float-right">Withdraw 1 ETH</button>
+              <br>
+              <div id="withdrawRes"></div>
             </div>
           </div>
           <br><br>
@@ -171,7 +176,7 @@
 
   <script src="lib/wasmsnark_bn128.js"></script>
   <script src="lib/snarkjs.js"></script>
-  <!-- <script src="node_modules/web3/dist/web3.min.js"></script> -->
+  <script src="node_modules/web3/dist/web3.min.js"></script>
   <script src="lib/miksi-browser.js"></script>
 
   <script src="index.js"></script>
