@@ -53,7 +53,10 @@
         <i>From Esperanto, <b>miksi</b> (miks·i): to mingle, to blend, to mix, to shuffle</i>
         <br>
         Ethereum trustless <b>zk-mixer</b>.
-        <br><br><br>
+        <br><br>
+        <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet, and without real value.</div>
+        <br><br>
+
         <!-- deposit -->
         <div class="tab-pane fade show active" id="deposit" role="tabpanel" aria-labelledby="deposit-tab">
           <div class="row">
@@ -62,7 +65,7 @@
               <hr>
               Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.
               <br><br>
-              <button onclick="todo()" class="btn color_primary float-right">Deposit 1 ETH</button>
+              <button onclick="deposit('deposit')" class="btn color_primary float-right">Deposit 1 ETH</button>
               <br><br><br>
             </div>
             <div class="col-md">
@@ -165,6 +168,13 @@
   <!-- <script src="node_modules/axios/dist/axios.min.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.bundle.min.js"></script> -->
+
+  <script src="lib/wasmsnark_bn128.js"></script>
+  <script src="lib/snarkjs.js"></script>
+  <!-- <script src="node_modules/web3/dist/web3.min.js"></script> -->
+  <script src="lib/miksi-browser.js"></script>
+
+  <script src="index.js"></script>
 
 
 </body>

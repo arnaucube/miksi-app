@@ -73,24 +73,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc66ff', end
   -webkit-touch-callout: none; /* Disable Android and iOS callouts*/
 }
 
-#qrcode > img {
-	border: 8px solid #ffffff;
-}
-
-.upload-btn-wrapper {
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
-
-.upload-btn-wrapper input[type=file] {
-  font-size: 100px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-}
-
 .balanceBox {
 	/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#cc66ff+0,FF00B9+98 */
 	background: #cc66ff; /* Old browsers */
@@ -106,6 +88,14 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc66ff', end
 	padding: 10px;
 	/* box-shadow: 0px 0px 30px grey; */
 }
+
 .balanceBox > h3 {
 	font-weight: 900;
+}
+
+.alertBox {
+  border: 1px #FF00B9 solid;
+  border-radius: 5px;
+  padding: 20px;
+  color: #FF00B9;
 }

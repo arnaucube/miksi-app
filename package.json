@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "browserify node_modules/snarkjs/index.js -o lib/snarkjs.js --standalone snarkjs --ignore-missing",
     "predeploy": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +13,12 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bootstrap": "^4.2.1",
-    "toastr": "^2.1.4"
+    "toastr": "^2.1.4",
+    "wasmsnark": "0.0.10",
+    "snarkjs": "^0.1.31",
+    "web3": "^1.0.0-beta.30"
+  },
+  "devDependencies": {
+    "browserify": "^16.5.0"
   }
 }
