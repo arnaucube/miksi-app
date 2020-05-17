@@ -2,8 +2,7 @@ var circuit = {};
 var provingKey = {};
 var witnessCalc = {};
 const abi = JSON.parse(`[{"inputs":[{"internalType":"address","name":"_depositVerifierContractAddr","type":"address"},{"internalType":"address","name":"_withdrawVerifierContractAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_commitment","type":"uint256"},{"internalType":"uint256","name":"_root","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getCommitments","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"_address","type":"address"},{"internalType":"uint256","name":"nullifier","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]`);
-// const miksiAddress = "0x6E77f4bB1356426baD1Bd014d04388eFAc197Fe1";
-const miksiAddress = "0xc9009d9Df413883B6064503FDA93A7A8ab9B7afb";
+const miksiAddress = "0x29DB549Ea98d41e0F28A5aA50ED1D37d62BA8C4B";
 
 function loadCircuit(circuitname) {
   fetch("circuits-files/"+circuitname+"-proving_key.bin").then( (response) => {
@@ -33,7 +32,10 @@ async function deposit(circuitname) {
   const nullifier = miksi.randBigInt().toString();
   // const secret = "1234567890";
   // const nullifier = "5678901234";
-  const commitments = [];
+  let res = await miksiContract.methods.getCommitments().call();
+  console.log("res", res);
+  const commitments = res[0];
+  console.log("commitments", commitments);
   // getCommitments from the tree
 
   // calculate witness
