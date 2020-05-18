@@ -48,12 +48,16 @@
     <div class="card-body">
       <!-- menu -->
       <div class="tab-content" id="myTabContent">
-        <button onclick="connectMetamask()" class="btn color_primary-o float-right">Connect Metamask</button>
+        <div class="float-right" style="text-align:right;">
+        <button onclick="connectMetamask()" class="btn color_primary-o">Connect Metamask</button>
+        <br><br>
+        Current address: <div id="contractAddr"></div>
+        </div>
         <h2><i>miksi</i></h2>
         <i>From Esperanto, <b>miksi</b> (miks·i): to mingle, to blend, to mix, to shuffle</i>
         <br>
         Ethereum trustless <b>zk-mixer</b>.
-        <br><br>
+        <br><br><br>
         <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet, without any real value.</div>
         <br><br>
 
@@ -63,8 +67,9 @@
             <div class="col-md">
               <h5 class="card-title">Deposit</h5>
               <hr>
-              a
-              Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit.
+              In order to make a deposit, will generate a zkSNARK proof that proves that you know a <i>secret</i> & <i>nullifier</i> for the <i>commitment</i>, and that that <i>commitment</i> has been added into the MerkleTree following the tree <i>state transition function</i> (which ensures that for the new <i>root</i>, there is only one leaf addition and no deletion).
+              <br>
+              If the zk-proof verification passes, the new <i>root</i> & <i>commitment</i> will be stored in to the <b>miksi</b> Smart Contract, and the ETH will be deposited.
               <br><br>
               <button onclick="deposit('deposit')" class="btn color_primary float-right">Deposit 1 ETH</button>
               <br><br>
@@ -74,7 +79,9 @@
             <div class="col-md">
               <h5 class="card-title">Withdraw</h5>
               <hr>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.
+              To be able to withdraw, will generate a zkSNARK proof that proves that you know a <i>secret</i> for a public <i>nullifier</i>, which <i>commitment</i> is in the MerkleTree which <i>root</i> is stored in the <b>miksi</b> Smart Contract.
+              <br>
+              If the zk-proof verification passes and the nullifier was not already used, the <b>miksi</b> Smart Contract will send the ETH to the specified address.
               <br><br>
               <textarea id="jsonWithdraw" class="form-control" style="width:100%;" placeholder="paste here your secret & nullifier"></textarea>
               <br>
@@ -89,7 +96,7 @@
           <h5 class="card-title">Stats</h5>
           <hr>
           <img src="miksi-logo00-square-pink.png" style="width:300px;" class="float-right">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+          <div id="stats">Please connect Metamask</div>
 
           <br>
         </div>

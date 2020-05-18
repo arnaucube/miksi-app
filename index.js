@@ -2,8 +2,10 @@ var circuit = {};
 var provingKey = {};
 var witnessCalc = {};
 const abi = JSON.parse(`[{"inputs":[{"internalType":"address","name":"_depositVerifierContractAddr","type":"address"},{"internalType":"address","name":"_withdrawVerifierContractAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_commitment","type":"uint256"},{"internalType":"uint256","name":"_root","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getCommitments","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"_address","type":"address"},{"internalType":"uint256","name":"nullifier","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]`);
-const miksiAddress = "0x3a88725bf9ABc85Dca64A4e6bc629D448032FA0F";
+const miksiAddress = "0x4cc45573481A2977fcC0b9DD9f8c710201B5a5cd";
 let metamask = false;
+
+document.getElementById("contractAddr").innerHTML=`<a href="https://goerli.etherscan.io/address/`+miksiAddress+`" target="_blank">`+miksiAddress+`</a>`;
 
 function loadCircuit(circuitname) {
   fetch("circuits-files/"+circuitname+"-proving_key.bin").then( (response) => {
@@ -131,8 +133,15 @@ async function withdraw(circuitname) {
 
   // calculate witness
   console.log(witnessCalc[circuitname]);
-  const proverAccounts = await web3.eth.getAccounts();
-  const addr = proverAccounts[0];
+  const addr = document.getElementById("withdrawAddress").value;
+  if (addr==undefined) {
+    toastr.error("No withdraw address defined");
+    return;
+  }
+  if (!web3.utils.isAddress(addr)) {
+    toastr.error("Error with withdraw address");
+    return;
+  }
   const cw = await miksi.calcWithdrawWitness(witnessCalc[circuitname], secret, nullifier, commitments, addr, key);
   const witness = cw.witness;
   const publicInputs = cw.publicInputs;
@@ -217,6 +226,17 @@ async function connectMetamask() {
 
   const acc = await web3.eth.getAccounts();
   const addr = acc[0];
-  web3.eth.getBalance(addr, function(err, res){console.log("BAL", JSON.stringify(res));});
+  web3.eth.getBalance(addr, function(err, res){
+    console.log("current address balance:", JSON.stringify(res));
+  });
+  const miksiBalance = await web3.eth.getBalance(miksiAddress);
+
+  let html = "<b>miksi</b> Smart Contract current balance: " + miksiBalance/1000000000000000000 + " ETH<br>";
+  let res = await miksiContract.methods.getCommitments().call();
+  const commitments = res[0];
+  const key = res[2];
+  html += "number of commitments: " + commitments.length + "<br>";
+  html += "current key: " + key + "<br>";
+  document.getElementById("stats").innerHTML = html;
 
 }
