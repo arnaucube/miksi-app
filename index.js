@@ -1,8 +1,9 @@
 var circuit = {};
 var provingKey = {};
 var witnessCalc = {};
-const abi = JSON.parse(`[{"inputs":[{"internalType":"address","name":"_depositVerifierContractAddr","type":"address"},{"internalType":"address","name":"_withdrawVerifierContractAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_commitment","type":"uint256"},{"internalType":"uint256","name":"_root","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getCommitments","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"_address","type":"address"},{"internalType":"uint256","name":"nullifier","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]`);
-const miksiAddress = "0x29DB549Ea98d41e0F28A5aA50ED1D37d62BA8C4B";
+const abi = JSON.parse(`[{"inputs":[{"internalType":"address","name":"_depositVerifierContractAddr","type":"address"},{"internalType":"address","name":"_withdrawVerifierContractAddr","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"uint256","name":"_commitment","type":"uint256"},{"internalType":"uint256","name":"_root","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"deposit","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"getCommitments","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"},{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address payable","name":"_address","type":"address"},{"internalType":"uint256","name":"nullifier","type":"uint256"},{"internalType":"uint256[2]","name":"a","type":"uint256[2]"},{"internalType":"uint256[2][2]","name":"b","type":"uint256[2][2]"},{"internalType":"uint256[2]","name":"c","type":"uint256[2]"}],"name":"withdraw","outputs":[],"stateMutability":"nonpayable","type":"function"}]`);
+const miksiAddress = "0x3a88725bf9ABc85Dca64A4e6bc629D448032FA0F";
+let metamask = false;
 
 function loadCircuit(circuitname) {
   fetch("circuits-files/"+circuitname+"-proving_key.bin").then( (response) => {
@@ -22,6 +23,10 @@ function loadCircuit(circuitname) {
 }
 
 async function deposit(circuitname) {
+  if (!metamask) {
+    toastr.error("Please install/connect Metamask");
+    return;
+  }
   document.getElementById("depositRes").innerHTML = `
     Generating zkProof & making the deposit
   `;
@@ -30,17 +35,18 @@ async function deposit(circuitname) {
   // TODO
   const secret = miksi.randBigInt().toString();
   const nullifier = miksi.randBigInt().toString();
-  // const secret = "1234567890";
-  // const nullifier = "5678901234";
+
   let res = await miksiContract.methods.getCommitments().call();
   console.log("res", res);
   const commitments = res[0];
+  const key = res[2];
   console.log("commitments", commitments);
+  console.log("key", key);
   // getCommitments from the tree
 
   // calculate witness
   console.log(witnessCalc[circuitname]);
-  const cw = await miksi.calcDepositWitness(witnessCalc[circuitname], secret, nullifier, commitments);
+  const cw = await miksi.calcDepositWitness(witnessCalc[circuitname], secret, nullifier, commitments, key);
   const witness = cw.witness;
   const publicInputs = cw.publicInputs;
   console.log("w", witness);
@@ -90,7 +96,8 @@ async function deposit(circuitname) {
   // print secret & nullifier
   let jw = {
     secret: secret,
-    nullifier: nullifier
+    nullifier: nullifier,
+    key: key
   };
   console.log("jw", JSON.stringify(jw));
   document.getElementById("depositRes").innerHTML = `
@@ -101,6 +108,10 @@ async function deposit(circuitname) {
 }
 
 async function withdraw(circuitname) {
+  if (!metamask) {
+    toastr.error("Please install/connect Metamask");
+    return;
+  }
   document.getElementById("withdrawRes").innerHTML = `
     Generating zkProof & making the withdraw
   `;
@@ -108,6 +119,7 @@ async function withdraw(circuitname) {
   const jw = JSON.parse(document.getElementById("jsonWithdraw").value);
   const secret = jw.secret;
   const nullifier = jw.nullifier;
+  const key = jw.key;
   console.log(secret, nullifier);
   const commitment = miksi.calcCommitment(secret, nullifier);
 
@@ -121,7 +133,7 @@ async function withdraw(circuitname) {
   console.log(witnessCalc[circuitname]);
   const proverAccounts = await web3.eth.getAccounts();
   const addr = proverAccounts[0];
-  const cw = await miksi.calcWithdrawWitness(witnessCalc[circuitname], secret, nullifier, commitments, addr);
+  const cw = await miksi.calcWithdrawWitness(witnessCalc[circuitname], secret, nullifier, commitments, addr, key);
   const witness = cw.witness;
   const publicInputs = cw.publicInputs;
   console.log("w", witness);
@@ -192,12 +204,16 @@ async function connectMetamask() {
   }
 
   if (!ethEnabled()) {
+    toastr.warning("Please install Metamask to use miksi");
     alert("Please install MetaMask to use miksi");
+  } else {
+    metamask = true;
   }
 
   console.log("abi", abi);
   miksiContract = new web3.eth.Contract(abi, miksiAddress);
   console.log("miksiContract", miksiContract);
+  toastr.info("Metamask connected. Miksi contract: ", miksiAddress);
 
   const acc = await web3.eth.getAccounts();
   const addr = acc[0];
