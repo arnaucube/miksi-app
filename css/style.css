@@ -99,3 +99,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cc66ff', end
   padding: 20px;
   color: #FF00B9;
 }
+
+.logs {
+  background:#000000;
+  padding:10px;
+  margin-top:20px;
+  font-family: "Courier";
+  max-height: 300px;
+  overflow-y: scroll;
+}

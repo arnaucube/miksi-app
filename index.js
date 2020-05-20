@@ -5,14 +5,34 @@ const abi = JSON.parse(`[{"inputs":[{"internalType":"address","name":"_depositVe
 const miksiAddress = "0x4cc45573481A2977fcC0b9DD9f8c710201B5a5cd";
 let metamask = false;
 
-document.getElementById("contractAddr").innerHTML=`<a href="https://goerli.etherscan.io/address/`+miksiAddress+`" target="_blank">`+miksiAddress+`</a>`;
+document.getElementById("contractAddr").innerHTML=`<a href="https://goerli.etherscan.io/address/`+miksiAddress+`" target="_blank" title="Miksi Smart Contract Address">`+miksiAddress+`</a>`;
+
+function println(...s) {
+  let r = "";
+  for (let i=0; i<s.length; i++) {
+    r = r + " " + s[i];
+  }
+  console.log(r);
+  document.getElementById("logs").innerHTML += r + "<br>";
+  document.getElementById("logs").scrollTop = document.getElementById("logs").scrollHeight;
+}
+function printerr(...s) {
+  // println(s);
+  let r = "";
+  for (let i=0; i<s.length; i++) {
+    r = r + " " + s[i];
+  }
+  console.log(r);
+  document.getElementById("logs").innerHTML += `<span style="color:red;">Error: ` + r + `</span><br>`;
+  document.getElementById("logs").scrollTop = document.getElementById("logs").scrollHeight;
+}
 
 function loadCircuit(circuitname) {
   fetch("circuits-files/"+circuitname+"-proving_key.bin").then( (response) => {
     return response.arrayBuffer();
   }).then( (b) => {
     provingKey[circuitname] = b;
-    console.log("proving_key loaded for", circuitname);
+    println("proving_key loaded for", circuitname);
   });
 
   fetch("circuits-files/"+circuitname+".wasm").then( (response) => {
@@ -20,7 +40,7 @@ function loadCircuit(circuitname) {
   }).then( (b) => {
     witnessCalc[circuitname] = b;
     console.log("w", b);
-    console.log("witnessCalc loaded for", circuitname);
+    println("witnessCalc loaded for", circuitname);
   });
 }
 
@@ -35,9 +55,12 @@ async function deposit(circuitname) {
   console.log("circuit:", circuitname);
 
   // TODO
+  println("generate random secret & nullifier");
   const secret = miksi.randBigInt().toString();
   const nullifier = miksi.randBigInt().toString();
+  console.log("S N", secret, nullifier);
 
+  println("get commitments from the miksi Smart Contract");
   let res = await miksiContract.methods.getCommitments().call();
   console.log("res", res);
   const commitments = res[0];
@@ -47,20 +70,26 @@ async function deposit(circuitname) {
   // getCommitments from the tree
 
   // calculate witness
+  println("rebuild the Merkle Tree & calculate witness for deposit");
   console.log(witnessCalc[circuitname]);
-  const cw = await miksi.calcDepositWitness(witnessCalc[circuitname], secret, nullifier, commitments, key);
+  const cw = await miksi.calcDepositWitness(witnessCalc[circuitname], secret, nullifier, commitments, key).catch((e) => {
+    toastr.error(e);
+    printerr(e);
+  });
+
   const witness = cw.witness;
   const publicInputs = cw.publicInputs;
   console.log("w", witness);
   console.log("publicInputs", publicInputs);
 
   // generate proof
-  const start = new Date().getTime();
   console.log(provingKey[circuitname]);
+  println("generate zkSNARK Groth16 proof for deposit");
+  const start = new Date().getTime();
   const proof = await window.groth16GenProof(witness.buffer, provingKey[circuitname]);
   const end = new Date().getTime();
   const time = end - start;
-  console.log("circuit " + circuitname + " took " + time + "ms to compute");
+  println("circuit " + circuitname + " took " + time + "ms to compute");
   console.log(proof);
 
 
@@ -79,6 +108,7 @@ async function deposit(circuitname) {
     ],
     [proof.pi_c[0], proof.pi_c[1]],
   );
+  println("send publicInputs & zkProof to the miksi Smart Contract for the deposit");
   miksiContract.methods.deposit(
     publicInputs.commitment,
     publicInputs.root.toString(),
@@ -91,8 +121,15 @@ async function deposit(circuitname) {
   ).send(
     {from: sender, value: 1000000000000000000},
     function(error, transactionHash){
-      console.log("https://goerli.etherscan.io/tx/"+transactionHash);
-      console.log(error);
+      if (error!=undefined) {
+        console.log(error);
+        toastr.error(error);
+        printerr(JSON.stringify(error));
+      } else {
+        let link = `<a href="https://goerli.etherscan.io/tx/`+transactionHash+`" target="_blank">
+              https://goerli.etherscan.io/tx/`+transactionHash+`</a>`;
+        println(link);
+      }
     });
 
   // print secret & nullifier
@@ -118,14 +155,21 @@ async function withdraw(circuitname) {
     Generating zkProof & making the withdraw
   `;
   console.log("circuit:", circuitname);
-  const jw = JSON.parse(document.getElementById("jsonWithdraw").value);
+  let jw;
+  try {
+  jw = JSON.parse(document.getElementById("jsonWithdraw").value);
+  } catch(e) {
+    toastr.error("Error reading secret & nullifier: " + e);
+  }
   const secret = jw.secret;
   const nullifier = jw.nullifier;
   const key = jw.key;
   console.log(secret, nullifier);
+  println("calculate commitment for the secret & nullifier");
   const commitment = miksi.calcCommitment(secret, nullifier);
 
   // getCommitments from the tree
+  println("get commitments from the miksi Smart Contract");
   let res = await miksiContract.methods.getCommitments().call();
   console.log("res", res);
   const commitments = res[0];
@@ -142,19 +186,25 @@ async function withdraw(circuitname) {
     toastr.error("Error with withdraw address");
     return;
   }
-  const cw = await miksi.calcWithdrawWitness(witnessCalc[circuitname], secret, nullifier, commitments, addr, key);
+  println("rebuild the Merkle Tree & calculate witness for withdraw");
+  const cw = await miksi.calcWithdrawWitness(witnessCalc[circuitname], secret, nullifier, commitments, addr, key).catch((e) => {
+    toastr.error(e);
+    printerr(e);
+  });
+
   const witness = cw.witness;
   const publicInputs = cw.publicInputs;
   console.log("w", witness);
   console.log("publicInputs", publicInputs);
 
   // generate proof
-  const start = new Date().getTime();
   console.log(provingKey[circuitname]);
+  println("generate zkSNARK Groth16 proof for withdraw");
+  const start = new Date().getTime();
   const proof = await window.groth16GenProof(witness.buffer, provingKey[circuitname]);
   const end = new Date().getTime();
   const time = end - start;
-  console.log("circuit " + circuitname + " took " + time + "ms to compute");
+  println("circuit " + circuitname + " took " + time + "ms to compute");
   console.log(proof);
 
 
@@ -173,6 +223,7 @@ async function withdraw(circuitname) {
     ],
     [proof.pi_c[0], proof.pi_c[1]],
   );
+  println("send publicInputs & zkProof to the miksi Smart Contract for the withdraw");
   miksiContract.methods.withdraw(
     publicInputs.address,
     publicInputs.nullifier,
@@ -185,13 +236,16 @@ async function withdraw(circuitname) {
   ).send(
     {from: sender},
     function(error, transactionHash){
-      console.log("https://goerli.etherscan.io/tx/"+transactionHash);
-      console.log(error);
+      if (error!=undefined) {
+        console.log(error);
+        toastr.error(error);
+        printerr(JSON.stringify(error));
+      } else {
+        let link = `<a href="https://goerli.etherscan.io/tx/`+transactionHash+`" target="_blank">
+              https://goerli.etherscan.io/tx/`+transactionHash+`</a>`;
+        println(link);
+      }
     });
-
-  // print secret & nullifier
-  document.getElementById("depositRes").innerHTML = `
-  `;
 }
 
 loadCircuit("deposit");
@@ -222,7 +276,8 @@ async function connectMetamask() {
   console.log("abi", abi);
   miksiContract = new web3.eth.Contract(abi, miksiAddress);
   console.log("miksiContract", miksiContract);
-  toastr.info("Metamask connected. Miksi contract: ", miksiAddress);
+  toastr.info("Metamask connected. Miksi contract: " + miksiAddress);
+  println("Metamask connected. Miksi contract: ", miksiAddress);
 
   const acc = await web3.eth.getAccounts();
   const addr = acc[0];
