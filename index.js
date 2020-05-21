@@ -49,6 +49,11 @@ async function deposit(circuitname) {
     toastr.error("Please install/connect Metamask");
     return;
   }
+  if (window.ethereum.networkVersion!='5') {
+    toastr.warning("Please switch to Göerli");
+    alert("Please switch to Göerli");
+    return;
+  }
   document.getElementById("depositRes").innerHTML = `
     Generating zkProof & making the deposit
   `;
@@ -91,6 +96,7 @@ async function deposit(circuitname) {
   const time = end - start;
   println("circuit " + circuitname + " took " + time + "ms to compute");
   console.log(proof);
+  console.log("proof", JSON.stringify(proof));
 
 
   // send tx
@@ -149,6 +155,11 @@ async function deposit(circuitname) {
 async function withdraw(circuitname) {
   if (!metamask) {
     toastr.error("Please install/connect Metamask");
+    return;
+  }
+  if (window.ethereum.networkVersion!='5') {
+    toastr.warning("Please switch to Göerli");
+    alert("Please switch to Göerli");
     return;
   }
   document.getElementById("withdrawRes").innerHTML = `
@@ -269,6 +280,11 @@ async function connectMetamask() {
   if (!ethEnabled()) {
     toastr.warning("Please install Metamask to use miksi");
     alert("Please install MetaMask to use miksi");
+    return;
+  } else if (window.ethereum.networkVersion!='5') {
+    toastr.warning("Please switch to Göerli");
+    alert("Please switch to Göerli");
+    return;
   } else {
     metamask = true;
   }
