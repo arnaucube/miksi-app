@@ -58,7 +58,7 @@
         <br>
         Ethereum trustless <b>zk-mixer</b>.
         <br><br><br>
-        <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet, without any real value.</div>
+        <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet. Do not use with real ETH.</div>
         <br><br>
 
         <!-- deposit -->
@@ -67,9 +67,11 @@
             <div class="col-md">
               <h5 class="card-title">Deposit</h5>
               <hr>
-              In order to make a deposit, will generate a zkSNARK proof that proves that you know a <i>secret</i> & <i>nullifier</i> for the <i>commitment</i>, and that that <i>commitment</i> has been added into the MerkleTree following the tree <i>state transition function</i> (which ensures that for the new <i>root</i>, there is only one leaf addition and no deletion).
-              <br>
-              If the zk-proof verification passes, the new <i>root</i> & <i>commitment</i> will be stored in to the <b>miksi</b> Smart Contract, and the ETH will be deposited.
+              Under the hood, we'll generate a zkSNARK proof that proves you know a <i>secret</i> for a <i>commitment</i>. And that this commitment has been correctly added to the MerkleTree containing all the commitments in the mixer.
+              </br>
+	      </br>
+		We'll send this proof, along with the new <i>commitment</i> and the hash of the updated MerkleTree, to the <b>miksi</b> smart-contract. The contract will then verify the proof. If the proof is valid, both the new <i>root</i> and the <i>commitment</i> will be added to the contract, and the ETH will be deposited.
+	      
               <br><br>
               <button onclick="deposit('deposit')" class="btn color_primary float-right">Deposit 1 ETH</button>
               <br><br>
@@ -79,16 +81,18 @@
             <div class="col-md">
               <h5 class="card-title">Withdraw</h5>
               <hr>
-              To be able to withdraw, will generate a zkSNARK proof that proves that you know a <i>secret</i> for a public <i>nullifier</i>, which <i>commitment</i> is in the MerkleTree which <i>root</i> is stored in the <b>miksi</b> Smart Contract.
-              <br>
-              If the zk-proof verification passes and the nullifier was not already used, the <b>miksi</b> Smart Contract will send the ETH to the specified address.
+              Under the hood, we'll generate a zkSNARK proof that proves you know a <i>secret</i> for a <i>commitment</i> in the MerkleTree that you wish to withdraw from.
+              </br>
+	      </br>
+              We'll send this proof, along with your withdrawal address, to the <b>miksi</b> smart-contract. The contract will then verify the proof. If the proof is valid, and it's the first time it's been correctly verified for this <i>commitment</i>, the contract will send the associated ETH to your withdrawal address.
               <br><br>
-              <textarea id="jsonWithdraw" class="form-control" style="width:100%;" placeholder="paste here your secret & nullifier"></textarea>
+              <textarea id="jsonWithdraw" class="form-control" style="width:100%;" placeholder="{''secret'': <secret>, ''nullifier'': <nullifier>, ''key'', <key>}"></textarea>
               <br>
-              <input id="withdrawAddress" class="form-control" placeholder="address where to withdraw"></input>
+              <input id="withdrawAddress" class="form-control" placeholder="withdrawal address"></input>
               <br>
               <button onclick="withdraw('withdraw')" class="btn color_primary float-right">Withdraw 1 ETH</button>
               <br>
+	      <br>
               <div id="withdrawRes"></div>
             </div>
           </div>
@@ -108,7 +112,7 @@
 
           <h5><i class="fa fa-info" aria-hidden="true"></i> Info</h5>
           <hr>
-          Spec & core code: <a href="https://github.com/arnaucube/miksi-core" target="_blank">https://github.com/arnaucube/miksi-core</a>
+          Specs and core code: <a href="https://github.com/arnaucube/miksi-core" target="_blank">https://github.com/arnaucube/miksi-core</a>
           <br>
           What is a <a href="https://en.wikipedia.org/wiki/Cryptocurrency_tumbler" target="_blank">mixer</a>?
           <br><br><br>
