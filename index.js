@@ -46,7 +46,7 @@ function loadCircuit(circuitname) {
 
 async function deposit(circuitname) {
   if (!metamask) {
-    toastr.error("Please install/connect Metamask");
+    toastr.error("Please connect Metamask by clicking on the button at the top of the page");
     return;
   }
   if (window.ethereum.networkVersion!='5') {
@@ -55,7 +55,7 @@ async function deposit(circuitname) {
     return;
   }
   document.getElementById("depositRes").innerHTML = `
-    Generating zkProof & making the deposit
+    Please wait. Generating the zk-proof and making the deposit...
   `;
   console.log("circuit:", circuitname);
 
@@ -146,15 +146,17 @@ async function deposit(circuitname) {
   };
   console.log("jw", JSON.stringify(jw));
   document.getElementById("depositRes").innerHTML = `
-  <b>Please store the secret data in a safe place:</b><br>
+  </br>
     <input class="form-control" onClick="this.select();" readonly value='`+JSON.stringify(jw)+`'>
     </input>
+</br>
+<b>Please store the data above in a safe place (anyone who has it will be able to withdraw your deposited ETH from the contract).</b>
   `;
 }
 
 async function withdraw(circuitname) {
   if (!metamask) {
-    toastr.error("Please install/connect Metamask");
+    toastr.error("Please connect Metamask by clicking on the button at the top of the page");
     return;
   }
   if (window.ethereum.networkVersion!='5') {
@@ -163,12 +165,12 @@ async function withdraw(circuitname) {
     return;
   }
   document.getElementById("withdrawRes").innerHTML = `
-    Generating zkProof & making the withdraw
+    Please wait. Generating the zk-proof and making the withdrawal...
   `;
   console.log("circuit:", circuitname);
   let jw;
   try {
-  jw = JSON.parse(document.getElementById("jsonWithdraw").value);
+     jw = JSON.parse(document.getElementById("jsonWithdraw").value); 
   } catch(e) {
     toastr.error("Error reading secret & nullifier: " + e);
   }
@@ -254,7 +256,8 @@ async function withdraw(circuitname) {
       } else {
         let link = `<a href="https://goerli.etherscan.io/tx/`+transactionHash+`" target="_blank">
               https://goerli.etherscan.io/tx/`+transactionHash+`</a>`;
-        println(link);
+         println(link);
+	 document.getElementById("withdrawRes").innerHTML = 'Success :)'
       }
     });
 }
