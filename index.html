@@ -57,8 +57,10 @@
         <i>From Esperanto, <b>miksi</b> (miks·i): to mingle, to blend, to mix, to shuffle</i>
         <br>
 	<br>
-        Ethereum trustless <b>zk-mixer</b>.  Computations and Merkle tree constructions are done offchain and then proved inside a zkSNARK to the smart-contract.
-        <br><br><br>
+	<div class="explainer">
+          Ethereum trustless <b>zk-mixer</b>.  Computations and Merkle tree reconstructions are done offchain and then proved inside a zkSNARK to the smart-contract.  This approach requires only <code>~325.000 gas</code> to deposit, compared to <code>~1M gas</code> for an onchain computation approach (as currently implemented by tornado.cash).
+	  </div>
+        <br><br>
         <div class="alertBox"><b>WARNING</b>: experimental code, use only in Göerli testnet. Do not use with real ETH.</div>
         <br><br>
 
@@ -115,7 +117,8 @@
           <hr>
           Specs and core code: <a href="https://github.com/arnaucube/miksi-core" target="_blank">https://github.com/arnaucube/miksi-core</a>
           <br>
-          What is a <a href="https://en.wikipedia.org/wiki/Cryptocurrency_tumbler" target="_blank">mixer</a>?
+	  </br>
+          What is a <a href="https://en.wikipedia.org/wiki/Cryptocurrency_tumbler" target="_blank">mixer</a>? A mixer is a tool to increase transaction privacy by breaking the on-chain link between the recipient and destination addresses. It uses a smart contract that accepts ETH deposits that can be withdrawn by a different address. Whenever a new address withdraws ETH, the link between the withdrawal and the deposit is obfuscated.
           <br><br><br>
           <h5><i class="fa fa-sliders" aria-hidden="true"></i> Config</h5>
           <hr>
